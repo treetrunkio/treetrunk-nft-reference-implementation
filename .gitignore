@@ -1,0 +1,7 @@
+bin
+build
+node_modules
+coverage
+.coverage*
+package-lock.json
+.vscode
