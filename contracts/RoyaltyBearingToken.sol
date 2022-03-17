@@ -66,7 +66,6 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
         return royaltyModule.updateRAccountLimits(maxSubAccounts, minRoyaltySplit);
     }
 
-    //https://hackmd.io/@afreund14031969/r1NDumcBt#Approach
     function updateMaxGenerations(uint256 newMaxNumber) public virtual returns (bool) {
         //ensure that msg.sender has the creater role or internal call
         require(hasRole(CREATOR_ROLE, _msgSender()) || address(this) == _msgSender(), 'Creator role required');
@@ -78,7 +77,6 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
         return (address(royaltyModule), address(paymentModule));
     }
 
-    //https://hackmd.io/@afreund14031969/r1NDumcBt#Approach
     function delegateAuthority(
         bytes4 functionSig,
         bytes calldata _functionData,
@@ -99,7 +97,6 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
         return true;
     }
 
-    //https://hackmd.io/@afreund14031969/r1NDumcBt#Approach
     //Note that functionSig must be calculated as follows
     //bytes4(keccak256("updateMaxGenerations(uint256)")
     function setFunctionSignature(bytes4 functionSig) public virtual returns (bool) {
@@ -153,7 +150,6 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
         return royaltyModule.getAccount(tokenId);
     }
 
-    // https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Update-a-Royalty-Account
     // Rules:
     // Only subaccount owner can decrease splitRoyalty for this subaccount
     // Only parent token owner can decrease royalty subaccount splitRoyalty
@@ -175,7 +171,6 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Minting-for-a-royalty-bearing-NFT
     function mint(
         address to,
         NFTToken[] memory nfttokens,
@@ -220,14 +215,13 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
 
             // We cannot just use balanceOf to create the new tokenId because tokens
             // can be burned (destroyed), so we need a separate counter.
-            // The NFT contract address(this) must be the owner. **(new in v1.2)**
+            // The NFT contract address(this) must be the owner
             _safeMint(address(this), tokenId);
 
-            //give to address minter role unless it has it already -- new in ver 1.3
+            //give to address minter role unless it has it already
             _grantRole(MINTER_ROLE, to);
 
             // after successful minting, the to address will be approved as an NFT controller.
-            // **(new in v1.2)**
             _approve(to, tokenId);
 
             //Create and link royalty account
@@ -246,7 +240,6 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
         }
     }
 
-    //https://hackmd.io/@afreund14031969/r1NDumcBt#Data-Structures
     function updateMaxChildren(uint256 tokenId, uint256 newMaxChildren) public virtual returns (bool) {
         //ensure that msg.sender has the role minter
         require(hasRole(CREATOR_ROLE, _msgSender()) || address(this) == _msgSender(), 'Creator role required');
@@ -337,15 +330,11 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
         return keccak256(abi.encodePacked(tokenType)) == keccak256(abi.encodePacked('ETH'));
     }
 
-    //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Listing-NFTs-for-Sale-new-in-v12
     function listNFT(
         uint256[] calldata tokenIds,
         uint256 price,
         string calldata tokenType
     ) public virtual returns (bool) {
-        //requires moved to paymentModule for decreace contact size
-        //require(price > 0, 'Zero Price not allowed');
-        //require(!paymentModule.existsInListNFT(tokenIds), 'Already exists');
 
         for (uint256 i = 0; i < tokenIds.length; i++) {
             require(getApproved(tokenIds[i]) == _msgSender(), 'Must be token owner');
@@ -370,7 +359,6 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
     }
 
     // ERC20 royalty payment
-    //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Payment-Function-from-Buyer-to-Seller-with-the-NFT-Contract-as-an-Escrow-Account-New-in-v12
     function executePayment(
         address receiver,
         address seller,
@@ -445,14 +433,12 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
         return success;
     }
 
-    //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Modified-NFT-Transfer-function-including-required-Trade-data-to-allocate-royalties
     function safeTransferFrom(
         address from,
         address to,
         uint256 tokenId,
         bytes memory data
     ) public override {
-        //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Payment-Parameter-Validation
         (
             address _seller,
             address _buyer,
@@ -476,7 +462,6 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
 
         require(royaltyModule.isSupportedTokenType(tokenId, _tokenType), 'Unsupported token type');
 
-        //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Removing-the-Payment-entry-in-registeredPayment-after-successful-transfer-new-in-v12
         //remove register payment
         paymentModule.removeRegisterPayment(to, tokenId);
 
@@ -484,14 +469,12 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
         _safeTransferFrom(from, to, tokenId, data);
     }
 
-    //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Modified-NFT-Transfer-function-including-required-Trade-data-to-allocate-royalties
     function _safeTransferFrom(
         address from,
         address to,
         uint256, /*tokenId*/
         bytes memory data
     ) internal virtual {
-        //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Payment-Parameter-Validation
         (, , , uint256[] memory _tokenIds, string memory tokenType, uint256 payment, address _tokenTypeAddress, ) = abi.decode(
             data,
             (address, address, address, uint256[], string, uint256, address, uint256)
@@ -512,14 +495,12 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
             royaltyModule.distributePayment(_tokenIds[i], _payments[i]);
 
             //base transfer after royalty pay
-            //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Transfering-Ownership-of-the-NFT-updated-in-v12
             _approve(to, _tokenIds[i]);
             //super.safeTransferFrom(from, to, _tokenId, data);
 
             //give to address minter role unless it has it already -- new in ver 1.3
             _grantRole(MINTER_ROLE, to);
 
-            //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Update-RA-ownership-with-payout-to-approved-address-from
             //Force royalty payout for old account
             uint256 balance = royaltyModule.getBalance(_tokenIds[i], payable(from));
             if (balance > 0) _royaltyPayOut(_tokenIds[i], payable(from), payable(from), balance);
@@ -533,7 +514,6 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
 
     receive() external payable {}
 
-    //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Payment-Function-from-Buyer-to-Seller-with-the-NFT-Contract-as-an-Escrow-Account-New-in-v12
     fallback() external payable {
         // decode msg.data to decide which transfer route to take
         (address seller, uint256[] memory tokenIds, address receiver, int256 trxntype) = abi.decode(msg.data, (address, uint256[], address, int256));
@@ -557,7 +537,6 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
         }
     }
 
-    //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Paying-out-Royalties-to-an-Owner
     function royaltyPayOut(
         uint256 tokenId,
         address RAsubaccount,
@@ -568,7 +547,6 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
         return _royaltyPayOut(tokenId, RAsubaccount, payoutAccount, amount);
     }
 
-    //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Paying-out-Royalties-to-an-Owner
     function _royaltyPayOut(
         uint256 tokenId,
         address RAsubaccount,
