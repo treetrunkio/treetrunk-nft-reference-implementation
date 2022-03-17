@@ -121,8 +121,6 @@ contract PaymentModule is StorageStructure, Ownable {
         else return 0;
     }
 
-    //part of
-    //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Input-parameter-validation
     function checkRegisterPayment(
         address buyer,
         uint256[] calldata tokenIds,
@@ -142,7 +140,6 @@ contract PaymentModule is StorageStructure, Ownable {
         return true;
     }
 
-    //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Removing-the-Payment-entry-in-registeredPayment-after-successful-transfer-new-in-v12
     function removeRegisterPayment(address buyer, uint256 tokenId) public virtual onlyOwner {
         require(registeredPayment[tokenId].buyer == buyer, 'RegisterPayment not found');
         delete registeredPayment[tokenId];

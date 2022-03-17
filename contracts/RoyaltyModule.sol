@@ -54,7 +54,6 @@ contract RoyaltyModule is StorageStructure, Ownable {
         return (royaltyAccount, _royaltyaccount[royaltyAccount], _royaltysubaccounts[royaltyAccount]);
     }
 
-    // https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Update-a-Royalty-Account
     // Lib variant
     // Rules:
     // Only subaccount owner can decrease splitRoyalty for this subaccount
@@ -166,7 +165,6 @@ contract RoyaltyModule is StorageStructure, Ownable {
         return raAccountId;
     }
 
-    //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Distributing-Royalties
     //Function for recursive distribution royalty for RA tree
     function distributePayment(uint256 tokenId, uint256 payment) public virtual onlyOwner returns (bool) {
         address royaltyAccount = _tokenindextoRA[tokenId];
@@ -250,7 +248,6 @@ contract RoyaltyModule is StorageStructure, Ownable {
         _royaltysubaccounts[_tokenindextoRA[tokenId]][subaccountIndex].royaltyBalance -= amount;
     }
 
-    //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Update-RA-ownership-with-payout-to-approved-address-from
     //Used in RoyaltyBearingToken._safeTransferFrom(address, address,uint256, bytes)
     //for transfer royalty account ownership after tranfer token ownership
     function transferRAOwnership(
@@ -279,7 +276,6 @@ contract RoyaltyModule is StorageStructure, Ownable {
         return (false, 0);
     }
 
-    //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Distributing-Royalties
     //Util function for split royalty payment
     function mulDiv(
         uint256 x,

@@ -2,7 +2,6 @@
 pragma solidity 0.8.10;
 
 contract StorageStructure {
-    //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Data-Structures
     struct RoyaltyAccount {
         //assetId is the tokenId of the NFT the RA belongs to
         uint256 assetId;
@@ -18,7 +17,6 @@ contract StorageStructure {
         //RASubAccount[] rasubaccount;
     }
 
-    //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Data-Structures
     struct RASubAccount {
         //accounttype is defined as isIndividual, and is a boolean variable, and if set to true, the account is that of an individual, if set to false, the account is an RA account ID
         bool isIndividual;
@@ -30,7 +28,6 @@ contract StorageStructure {
         address accountId;
     }
 
-    //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Data-Structures
     struct Child {
         //link to parent token
         uint256 parentId;
@@ -42,7 +39,6 @@ contract StorageStructure {
         uint256[] children;
     }
 
-    //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Minting-for-a-royalty-bearing-NFT
     struct NFTToken {
         //the parent of the (child) token, if 0 then there is no parent
         uint256 parent;
@@ -56,7 +52,6 @@ contract StorageStructure {
         string uri;
     }
 
-    //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Data-Structures
     struct RegisteredPayment {
         //Buyer
         address buyer;
@@ -68,7 +63,6 @@ contract StorageStructure {
         uint256 payment;
     }
 
-    //https://hackmd.io/@o70I-dRsSdeopRewqTLbnw/r1NDumcBt#Data-Structures
     struct ListedNFT {
         //Seller
         address seller;
