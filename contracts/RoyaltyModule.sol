@@ -133,7 +133,7 @@ contract RoyaltyModule is StorageStructure, Ownable {
             //create the RA subaccount for the to address
             _royaltysubaccounts[raAccountId].push(RASubAccount({isIndividual: true, royaltySplit: 10000 - _royaltySplitTT, royaltyBalance: 0, accountId: to}));
 
-            //create the RA subaccount for TreeTrunk ... new v1.3
+            //create the RA subaccount for TreeTrunk
             _royaltysubaccounts[raAccountId].push(RASubAccount({isIndividual: true, royaltySplit: _royaltySplitTT, royaltyBalance: 0, accountId: _ttAddress}));
 
             //now create the Royalty Account
@@ -150,7 +150,7 @@ contract RoyaltyModule is StorageStructure, Ownable {
             //create the RA subaccount for the to address
             _royaltysubaccounts[raAccountId].push(RASubAccount({isIndividual: true, royaltySplit: 10000 - parentRA.royaltySplitForItsChildren - _royaltySplitTT, royaltyBalance: 0, accountId: to}));
 
-            //create the RA subaccount for TreeTrunk ... new v1.3
+            //create the RA subaccount for TreeTrunk
             _royaltysubaccounts[raAccountId].push(RASubAccount({isIndividual: true, royaltySplit: _royaltySplitTT, royaltyBalance: 0, accountId: _ttAddress}));
 
             //create the RA subaccount for the RA address of the ancestor
