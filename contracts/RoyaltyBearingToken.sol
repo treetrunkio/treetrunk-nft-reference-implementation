@@ -30,10 +30,10 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
         uint256 numGenerations
     ) ERC721(name, symbol) {
         _baseTokenURI = baseTokenURI;
-        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender()); //v1.3
-        _setupRole(MINTER_ROLE, _msgSender()); //v1.3
+        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        _setupRole(MINTER_ROLE, _msgSender());
         _setupRole(PAUSER_ROLE, _msgSender());
-        _setupRole(CREATOR_ROLE, creatorAddress); //v1.3
+        _setupRole(CREATOR_ROLE, creatorAddress);
 
         require(allowedTokenTypes.length == allowedTokenAddresses.length, 'Numbers of allowed tokens');
         _numGenerations = numGenerations;
