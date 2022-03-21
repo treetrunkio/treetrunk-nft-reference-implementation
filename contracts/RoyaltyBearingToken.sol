@@ -371,9 +371,9 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
         require(trxntype == 0 || trxntype == 1, 'Trxn type not supported');
         require(receiver != address(0), 'Receiver must not be zero');
         _requireExistsAndOwned(tokenIds, seller);
-        if (trxntype == 0) {
+        
             paymentModule.isValidPaymentMetadata(seller, tokenIds, payment, tokenType);
-        }
+            
         //Execute ERC20 payment
         address payToken = allowedToken[tokenType];
         {
