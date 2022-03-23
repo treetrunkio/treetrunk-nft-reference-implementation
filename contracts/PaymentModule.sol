@@ -122,22 +122,14 @@ contract PaymentModule is StorageStructure, Ownable {
     }
 
     function checkRegisterPayment(
+        uint256 tokenId,
         address buyer,
-        uint256[] calldata tokenIds,
-        uint256 payment,
-        string calldata tokenType
-    ) public view virtual returns (bool) {
-        require(registeredPayment[tokenIds[0]].buyer == buyer, 'RegisterPayment not found');
-        //check if payment is sufficient
-        require(registeredPayment[tokenIds[0]].payment == payment, 'Payment not match');
-        //check if token type supported
-        require(_isSameString(registeredPayment[tokenIds[0]].tokenType, tokenType), 'TokenType not match');
-        //check if token list are same
-        uint256[] memory listedTokens = listedNFT[tokenIds[0]].listedtokens;
-        for (uint256 i = 0; i < listedTokens.length; i++) {
-            require(tokenIds[i] == listedTokens[i], 'List of token not match');
-        }
-        return true;
+        string memory tokenType
+    ) public view virtual returns (uint256) {
+        if (registeredPayment[tokenId].buyer == buyer) {
+            require(_isSameString(tokenType, registeredPayment[tokenId].tokenType), 'TokenType mismatch');
+            return registeredPayment[tokenId].payment;
+        } else return 0;
     }
 
     function removeRegisterPayment(address buyer, uint256 tokenId) public virtual onlyOwner {
