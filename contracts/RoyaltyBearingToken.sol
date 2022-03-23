@@ -29,13 +29,15 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
         address creatorAddress,
         uint256 numGenerations
     ) ERC721(name, symbol) {
+        require(_msgSender() == tx.origin, 'Caller must not be a contract');
+        require(!creatorAddress.isContract(), 'Creator must not be a contract');
+        require(allowedTokenTypes.length == allowedTokenAddresses.length, 'Numbers of allowed tokens');
         _baseTokenURI = baseTokenURI;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(MINTER_ROLE, _msgSender());
         _setupRole(PAUSER_ROLE, _msgSender());
         _setupRole(CREATOR_ROLE, creatorAddress);
 
-        require(allowedTokenTypes.length == allowedTokenAddresses.length, 'Numbers of allowed tokens');
         _numGenerations = numGenerations;
 
         for (uint256 i = 0; i < allowedTokenTypes.length; i++) {
@@ -83,8 +85,10 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
         bytes32 documentHash,
         uint8[] memory sigV,
         bytes32[] memory sigR,
-        bytes32[] memory sigS
+        bytes32[] memory sigS,
+        uint256 chainid
     ) public virtual returns (bool) {
+        require(chainid == block.chainid, 'Wrong blockchain');
         require(functionSigMap[functionSig], 'Not a valid function');
 
         bytes32 prefixedProof = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', documentHash));
@@ -180,7 +184,12 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
         require(hasRole(MINTER_ROLE, _msgSender()) || hasRole(CREATOR_ROLE, _msgSender()), 'Minter or Creator role required');
         //ensure to address is not a contract
         require(to != address(0x0), 'Zero Address cannot have active NFTs!');
-        require(!to.isContract(), 'Cannot be minted to contracts');
+        //require(!to.isContract(), 'Cannot be minted to contracts');
+        if (to == _msgSender()) {
+            require(tx.origin == to, 'To must not be contracts');
+        } else {
+            require(!to.isContract(), 'To must not be contracts');
+        }
 
         //token type must exist
         require(allowedToken[tokenType] != address(0x0), 'Token Type not supported!');
@@ -286,7 +295,6 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
 
     function burn(uint256 tokenId) public virtual override {
         require(getApproved(tokenId) == _msgSender(), 'Sender not authorized to burn');
-        require(_exists(tokenId), 'NFT does not exist');
         require(ancestry[tokenId].children.length == 0, 'NFT must not have children');
         //delete token from royalty (check for 0 balance included)
         royaltyModule.deleteRoyaltyAccount(tokenId);
@@ -366,7 +374,7 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
         uint256 payment,
         string calldata tokenType,
         int256 trxntype
-    ) public virtual returns (bool) {
+    ) public virtual nonReentrant returns (bool) {
         require(payment > 0, 'Payments cannot be 0!');
         require(trxntype == 0 || trxntype == 1, 'Trxn type not supported');
         require(receiver != address(0), 'Receiver must not be zero');
@@ -410,8 +418,7 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
         string memory tokenType,
         address buyer
     ) public view virtual returns (uint256) {
-        require(royaltyModule.isSupportedTokenType(tokenId, tokenType), 'TokenType mismatch');
-        return paymentModule.checkRegisterPayment(tokenId, buyer);
+        return paymentModule.checkRegisterPayment(tokenId, buyer, tokenType);
     }
 
     function reversePayment(uint256 tokenId, string memory tokenType) public virtual nonReentrant returns (bool) {
@@ -459,8 +466,6 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
         require(paymentModule.checkRegisterPayment(_buyer, _tokenIds, _payment, _tokenType));
 
         _requireExistsAndOwned(_tokenIds, _seller);
-
-        require(royaltyModule.isSupportedTokenType(tokenId, _tokenType), 'Unsupported token type');
 
         //remove register payment
         paymentModule.removeRegisterPayment(to, tokenId);

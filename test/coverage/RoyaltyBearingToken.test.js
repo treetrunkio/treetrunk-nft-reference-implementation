@@ -19,6 +19,8 @@ contract('RoyaltyBearingToken', (accounts) => {
     const token_1 = 1;
     const token_1_1 = 2;
     const token_1_1_1 = 3;
+    const token_1_1_2 = 4;
+    const token_2 = 5;
     const token_not_exists = 999;
 
     let token;
@@ -34,16 +36,24 @@ contract('RoyaltyBearingToken', (accounts) => {
         paymentModule = await PaymentModule.deployed();
 
         //Mint some  ERC20 tokens
+        await someToken1.mint(accBuyer, 100000000, { from: accAdmin });
         await someToken2.mint(accBuyer, 100000000, { from: accAdmin });
         await someToken2.mint(accOtherBuyer, 100000000, { from: accAdmin });
     });
 
-    describe('Mint restrictions', async () => {
-        /*
-         it('Token list required', async () => {
-            await truffleAssert.reverts(token.mint(accSeller, [[0x0, true, 10, 1000, 'uri_1']], 'ST2', { from: accAdmin }));
+    describe('addAllowedTokenType restrictions', async () => {
+        it('Caller must have admin role', async () => {
+            await truffleAssert.reverts(token.addAllowedTokenType('ST1', someToken1.address, { from: accSomeOther }), 'Admin role required');
         });
-        */
+        it('Duplicate not allowed', async () => {
+            await truffleAssert.reverts(token.addAllowedTokenType('ST1_1', someToken1.address), 'Token is duplicate');
+        });
+        it('Token address must be contract', async () => {
+            await truffleAssert.reverts(token.addAllowedTokenType('ST_Err', accSomeOther, { from: accAdmin }), 'Token must be contact');
+        });
+    });
+
+    describe('Mint restrictions', async () => {
         it('Caller must have minter role', async () => {
             await truffleAssert.reverts(token.mint(accSeller, [[0x0, true, 10, 1000, 'uri_1']], 'ST2', { from: accSeller }), 'Minter or Creator role required');
         });
@@ -51,7 +61,7 @@ contract('RoyaltyBearingToken', (accounts) => {
             await truffleAssert.reverts(token.mint(ZERO_ADDRESS, [[0x0, true, 10, 1000, 'uri_1']], 'ST2', { from: accAdmin }), 'Zero Address cannot have active NFTs!');
         });
         it('To must not be contract', async () => {
-            await truffleAssert.reverts(token.mint(someToken2.address, [[0x0, true, 10, 1000, 'uri_1']], 'ST2', { from: accAdmin }), 'Cannot be minted to contracts');
+            await truffleAssert.reverts(token.mint(someToken2.address, [[0x0, true, 10, 1000, 'uri_1']], 'ST2', { from: accAdmin }), ' To must not be contracts');
         });
         it('Parent must be zero or existing token', async () => {
             await truffleAssert.reverts(token.mint(accSeller, [[999, true, 10, 1000, 'uri_1']], 'ST2', { from: accAdmin }), 'Parent NFT does not exist');
@@ -66,17 +76,28 @@ contract('RoyaltyBearingToken', (accounts) => {
             await truffleAssert.reverts(token.mint(accSeller, [[0x0, true, 10, 1000, 'uri_1']], 'ST3', { from: accAdmin }), 'Token Type not supported!');
         });
         it('Mint some tokens', async () => {
+            //ERC20 tokens
             await token.mint(
                 accSeller,
                 [
-                    [0x0, true, 10, 1000, 'uri_1'],
-                    [0x1, true, 10, 1000, 'uri_1.1'],
-                    [0x2, false, 10, 1000, 'uri_1.1.1'],
+                    [0x0, true, 10, 1000, 'uri_1'], // id = 1
+                    [0x1, true, 10, 1000, 'uri_1.1'], // id = 2
+                    [0x2, false, 10, 1000, 'uri_1.1.1'], // id = 3
+                    [0x2, false, 10, 1000, 'uri_1.1.2'], // id = 4
                 ],
                 'ST2',
                 { from: accAdmin },
             );
-            assert.equal((await token.balanceOf(token.address)).toString(), 3, 'Token balance must changed');
+            //ETH tokens
+            await token.mint(
+                accSeller,
+                [
+                    [0x0, true, 10, 1000, 'uri_2'], // id = 5
+                ],
+                'ETH',
+                { from: accAdmin },
+            );
+            assert.equal((await token.balanceOf(token.address)).toString(), 5, 'Token balance must changed');
             assert.equal(await token.hasRole(MINTER_ROLE, accSeller), true, 'CREATOR role must granted');
             assert.equal(await token.getApproved(1), accSeller, 'Token approved for owner');
             assert.equal(await token.getApproved(2), accSeller, 'Token approved for owner');
@@ -110,6 +131,9 @@ contract('RoyaltyBearingToken', (accounts) => {
         it('List NFT (1)', async () => {
             await token.listNFT([1], costOfNFT, 'ST2', { from: accSeller });
         });
+        it('List NFT (5) by ETH', async () => {
+            await token.listNFT([5], costOfNFT, 'ETH', { from: accSeller });
+        });
     });
     describe('removeNFTListing restriction', async () => {
         it('Caller must be token owner', async () => {
@@ -132,7 +156,8 @@ contract('RoyaltyBearingToken', (accounts) => {
         it('getAllListNFT function', async () => {
             const result = await paymentModule.getAllListNFT();
             assert.equal(result[0].toNumber(), 2);
-            assert.equal(result[1].toNumber(), 1);
+            assert.equal(result[1].toNumber(), 5);
+            assert.equal(result[2].toNumber(), 1);
         });
     });
 
@@ -150,7 +175,7 @@ contract('RoyaltyBearingToken', (accounts) => {
             await truffleAssert.reverts(token.executePayment(accReceiver, accSeller, [2, 3], costOfNFT, 'ST2', 0, { from: accBuyer }), 'Insufficient token allowance');
         });
         it('Payment must be for existing list', async () => {
-            await truffleAssert.reverts(token.executePayment(accReceiver, accSeller, [5], costOfNFT, 'ST2', 0, { from: accBuyer }), 'Token does not exist');
+            await truffleAssert.reverts(token.executePayment(accReceiver, accSeller, [token_not_exists], costOfNFT, 'ST2', 0, { from: accBuyer }), 'Token does not exist');
         });
         it('Seller must be equals to seller in list', async () => {
             await truffleAssert.reverts(token.executePayment(accReceiver, accSomeOther, [2, 3], costOfNFT, 'ST2', 0, { from: accBuyer }), 'Seller is not owner');
@@ -160,6 +185,12 @@ contract('RoyaltyBearingToken', (accounts) => {
         });
         it('Token list must mach to listed tokens', async () => {
             await truffleAssert.reverts(token.executePayment(accReceiver, accSeller, [2, 1], costOfNFT, 'ST2', 0, { from: accBuyer }), 'One or more tokens are not listed');
+        });
+        it('Payment nust be > 0', async () => {
+            await truffleAssert.reverts(token.executePayment(accReceiver, accSeller, [2, 3], 0, 'ST2', 0, { from: accBuyer }), 'Payments cannot be 0!');
+        });
+        it('Payment ignore other trxntype', async () => {
+            await truffleAssert.reverts(token.executePayment(accReceiver, accSeller, [2, 3], costOfNFT, 'ST2', 4, { from: accBuyer }), 'Trxn type not supported');
         });
 
         it('Payment for (2,3) trxntype=0 success', async () => {
@@ -171,6 +202,10 @@ contract('RoyaltyBearingToken', (accounts) => {
         it('Only 1 payment allowed for (2,3). (2,3) was already sold', async () => {
             await someToken2.approve(token.address, costOfNFT, { from: accBuyer });
             await truffleAssert.reverts(token.executePayment(accReceiver, accSeller, [2, 3], costOfNFT, 'ST2', 0, { from: accBuyer }), 'Seller is not owner');
+        });
+        it('Payment for (1) trxntype=1 must have right token type', async () => {
+            await someToken1.approve(token.address, costOfNFT, { from: accBuyer });
+            await truffleAssert.reverts(token.executePayment(accReceiver, accSeller, [1], costOfNFT, 'ST1', 1, { from: accBuyer }), 'Payment token does not match list token type');
         });
         it('Payment for (1) trxntype=1 success', async () => {
             await someToken2.approve(token.address, costOfNFT, { from: accBuyer });
@@ -190,6 +225,29 @@ contract('RoyaltyBearingToken', (accounts) => {
         });
         it('Can not unlist token after pay', async () => {
             await truffleAssert.reverts(token.removeNFTListing(1, { from: accSeller }), 'RegisterPayment exists for NFT');
+        });
+        it('checkPayment must have valid token type', async () => {
+            await truffleAssert.reverts(token.checkPayment(1, 'ST1', accBuyer, { from: accSeller }), 'TokenType mismatch');
+        });
+        it('reversePayment fails if payment not exists', async () => {
+            await truffleAssert.reverts(token.reversePayment(1, 'ST2', { from: accSomeOther }), 'No payment registered');
+        });
+        it('Payment for (5) must have right transaction type', async () => {
+            const data = web3.eth.abi.encodeParameters(['address', 'uint256[]', 'address', 'int256'], [accSeller, [5], accBuyer, 3]);
+            await truffleAssert.reverts(web3.eth.sendTransaction({ from: accBuyer, to: token.address, value: costOfNFT, data: data, gas: 1000000 }), 'Trxn type not supported');
+        });
+
+        it('Payment for (5) trxntype=1 success', async () => {
+            const data = web3.eth.abi.encodeParameters(['address', 'uint256[]', 'address', 'int256'], [accSeller, [5], accBuyer, 1]);
+            await web3.eth.sendTransaction({ from: accBuyer, to: token.address, value: costOfNFT, data: data, gas: 1000000 });
+            assert.equal(await token.getApproved(5), accSeller, 'Token must transfer manual later');
+            const payment = await token.checkPayment(5, 'ETH', accBuyer, { from: accSeller });
+            assert.equal(payment.toNumber(), costOfNFT);
+        });
+        it('reversePayment for (5) success', async () => {
+            await token.reversePayment(5, 'ETH', { from: accBuyer });
+            const payment = await token.checkPayment(5, 'ETH', accBuyer, { from: accSeller });
+            assert.equal(payment.toNumber(), 0);
         });
     });
     describe('safeTransferFrom restrictions', async () => {
@@ -294,6 +352,9 @@ contract('RoyaltyBearingToken', (accounts) => {
         it('Burn token with children not allowed', async () => {
             await truffleAssert.reverts(token.burn(token_1_1, { from: accBuyer }), 'NFT must not have children');
         });
+        it('Burn token must exists', async () => {
+            await truffleAssert.reverts(token.burn(token_not_exists, { from: accBuyer }), 'ERC721: approved query for nonexistent token');
+        });
         it('Payout TT royalty from (3)', async () => {
             const ra_1_1_1_before = await token.getRoyaltyAccount(token_1_1_1);
             await token.royaltyPayOut(token_1_1_1, accAdmin, accAdmin, ra_1_1_1_before.subaccounts[1].royaltyBalance, { from: accAdmin });
@@ -320,12 +381,18 @@ contract('RoyaltyBearingToken', (accounts) => {
             await truffleAssert.reverts(token.updateMaxChildren(token_1_1, 0, { from: accAdmin }), 'Max < Actual');
         });
         it('updateMaxChildren success', async () => {
-            await token.updateMaxChildren(token_1_1, 2, { from: accAdmin });
+            await token.updateMaxChildren(token_1_1, 3, { from: accAdmin });
         });
     });
     describe('updateMaxGenerations restrictions', async () => {
         it('updateMaxGenerations not allowed without CREATOR_ROLE', async () => {
             await truffleAssert.reverts(token.updateMaxGenerations(5, { from: accSomeOther }), 'Creator role required');
+        });
+        it('updateMaxGenerations success', async () => {
+            await token.updateMaxGenerations(1, { from: accAdmin });
+        });
+        it('mint not allowed for new generations', async () => {
+            await truffleAssert.reverts(token.mint(accSeller, [[token_1_1, true, 10, 1000, 'uri_1.1.1.1']], 'ST2', { from: accAdmin }), 'Generation limit');
         });
         it('updateMaxGenerations success', async () => {
             await token.updateMaxGenerations(5, { from: accAdmin });
@@ -366,32 +433,62 @@ contract('RoyaltyBearingToken', (accounts) => {
             const result = await token.supportsInterface('0x0000');
             assert.equal(result, false);
         });
+        it('second init call not allowed', async () => {
+            await truffleAssert.reverts(token.init(ZERO_ADDRESS, ZERO_ADDRESS, { from: accAdmin }), 'Init was called before');
+        });
+        it('updatelistinglimit caller must be creator', async () => {
+            await truffleAssert.reverts(token.updatelistinglimit(10, { from: accSomeOther }), 'Creator role required');
+        });
+        it('updateRAccountLimits caller must be creator', async () => {
+            await truffleAssert.reverts(token.updateRAccountLimits(10, 10, { from: accSomeOther }), 'Creator role required');
+        });
+        it('onERC721Received accept only own tokens', async () => {
+            await truffleAssert.reverts(token.onERC721Received(ZERO_ADDRESS, accSomeOther, 1, '0x0', { from: accSomeOther }), 'Only minted');
+        });
+        it('getRoyaltyAccount cant get not exist token', async () => {
+            await truffleAssert.reverts(token.getRoyaltyAccount(token_not_exists, { from: accSomeOther }), 'NFT does not exist');
+        });
     });
     describe('Delegate call', async () => {
         const funcSig1 = web3.utils.keccak256('updateMaxGenerations(uint256)').substring(0, 6);
         const funcSig2 = web3.utils.keccak256('updatelistinglimit(uint256)').substring(0, 6);
+        console.log('funcSig2', funcSig2);
         it('Only creator can call setFunctionSignature', async () => {
             await truffleAssert.reverts(token.setFunctionSignature(funcSig1, { from: accSomeOther }), 'Admin or Creator role required');
         });
         it('Set signatures', async () => {
             await token.setFunctionSignature(funcSig1, { from: accAdmin });
         });
-        /*
+
         it('Only registered function can be called', async () => {
             await truffleAssert.reverts(
                 token.delegateAuthority(
                     funcSig2,
                     web3.utils.randomHex(32), //
                     web3.utils.randomHex(32),
-                    web3.utils.randomHex(8),
-                    web3.utils.randomHex(32),
-                    web3.utils.randomHex(32),
+                    [0,1,2],
+                    [web3.utils.randomHex(32)],
+                    [web3.utils.randomHex(32)],
+                    1,
                     { from: accAdmin },
                 ),
-                'AAA1',
+                'Not a valid function',
             );
         });
-        it('', async () => {});
-        */
+        it('Invalid signature not allowed', async () => {
+            await truffleAssert.reverts(
+                token.delegateAuthority(
+                    funcSig1,
+                    web3.utils.randomHex(32), //
+                    web3.utils.randomHex(32),
+                    [0,1,2],
+                    [web3.utils.randomHex(32)],
+                    [web3.utils.randomHex(32)],
+                    1,
+                    { from: accAdmin },
+                ),
+                'Signature',
+            );
+        });
     });
 });
