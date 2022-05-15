@@ -27,7 +27,7 @@ contract RoyaltyModule is StorageStructure, Ownable {
         transferOwnership(owner);
         require(royaltySplitTT < 10000, 'Royalty Split to TT is > 100%'); //new v1.3
         require(royaltySplitTT + minRoyaltySplit < 10000, 'Royalty Split to TT + Minimal Split is > 100%');
-        require(ttAddress != address(0), 'Zero Address cannot be TT roaylty account');
+        require(ttAddress != address(0), 'Zero Address cannot be TT royalty account');
         _ttAddress = ttAddress;
         _royaltySplitTT = royaltySplitTT;
         _maxSubAccount = maxSubAccounts;
@@ -235,7 +235,7 @@ contract RoyaltyModule is StorageStructure, Ownable {
         return getSubaccount(tokenId, subaccountIndex).royaltyBalance;
     }
 
-    //Used for reduce royalty ballance after payout
+    //Used for reduce royalty balance after payout
     //Used only in RoyaltyBearingToken._royaltyPayOut(uint256,address,address,uint256)
     function withdrawBalance(
         uint256 tokenId,
@@ -285,7 +285,7 @@ contract RoyaltyModule is StorageStructure, Ownable {
         return ABDKMathQuad.toUInt(ABDKMathQuad.div(ABDKMathQuad.mul(ABDKMathQuad.fromUInt(x), ABDKMathQuad.fromUInt(y)), ABDKMathQuad.fromUInt(z)));
     }
 
-    //Util function for  split value by pieces without remains
+    //Util function for split value by pieces without remains
     function splitSum(uint256 sum, uint256 pieces) public pure virtual returns (uint256[] memory) {
         uint256[] memory result = new uint256[](pieces);
         uint256 remains = sum;
