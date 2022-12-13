@@ -142,6 +142,18 @@ contract PaymentModule is StorageStructure, Ownable {
         } else return 0;
     }
 
+    function checkRegisterPayment(
+        address buyer,
+        uint256 tokenId,
+        uint256 _payment,
+        string memory tokenType
+    ) public view virtual returns (uint256) {
+        if((registeredPayment[tokenId].buyer == buyer) && (_isSameString(tokenType, registeredPayment[tokenId].tokenType))) {
+            require(registeredPayment[tokenId].payment == _payment);
+            return registeredPayment[tokenId].payment;
+        } else return 0;
+    }
+
     function removeRegisterPayment(address buyer, uint256 tokenId) public virtual onlyOwner {
         require(registeredPayment[tokenId].buyer == buyer, 'RegisterPayment not found');
         delete registeredPayment[tokenId];
