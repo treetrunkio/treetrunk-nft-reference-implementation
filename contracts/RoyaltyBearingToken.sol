@@ -281,7 +281,7 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
         address from,
         address to,
         uint256 tokenId
-    ) internal virtual override(ERC721, ERC721Pausable) {
+    ) internal virtual{
         super._beforeTokenTransfer(from, to, tokenId);
     }
 
