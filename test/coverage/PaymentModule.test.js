@@ -24,6 +24,7 @@ contract('PaymentModule', (accounts) => {
             await truffleAssert.reverts(paymentModule.removeRegisterPayment(ZERO_ADDRESS, [0], { from: accAdmin }), '');
         });
     });
+
     describe('Getter functions', async () => {
         it('getRegisterPayment for empty token', async () => {
             const result = await paymentModule.getRegisterPayment(1, { from: accAdmin });
@@ -34,4 +35,21 @@ contract('PaymentModule', (accounts) => {
             assert.equal(payment, 0);
         });
     });
+
+    describe('addListNFT',async () =>{
+        it('Check NFT Price', async () =>{
+            const result = await paymentModule.addListNFT(ZERO_ADDRESS, [0], 0, '', { from: accAdmin });
+            assert.equal(result.price,0);
+        });
+        it('Check if is already exist', async () =>{
+            const result = await paymentModule.addListNFT(ZERO_ADDRESS, [0], 0, '', { from: accAdmin });
+            assert(existsInListNFT(result.tokenId));
+        });
+        it('Check number of tokens listed', async() => {
+            const result = await paymentModule.addListNFT(ZERO_ADDRESS, [0], 0, '', { from: accAdmin });
+            const tokenIds = result.tokenIds;
+            assert(tokenIds.length <= _maxListingNumber);
+        });
+    });
+
 });

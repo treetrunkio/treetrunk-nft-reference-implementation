@@ -39,4 +39,6 @@ contract('RoyaltyModule', (accounts) => {
             assert.equal(balance, 0);
         });
     });
+
+    
 });
