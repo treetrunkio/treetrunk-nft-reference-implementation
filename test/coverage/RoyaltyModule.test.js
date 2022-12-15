@@ -39,6 +39,17 @@ contract('RoyaltyModule', (accounts) => {
             assert.equal(balance, 0);
         });
     });
+    describe('Test correct RoyaltySplitTT', async() => {
+        it('Royalty Split to be received from their children should less than 100%', async() => {
+            const royalty_distribute = await royaltyModule.createRoyaltyAccount(ZERO_ADDRESS, 0, 0, '', 0, { from: accAdmin });
+            assert(royalty_distribute.royaltySplitForItsChildren <= 10000); 
+        });
+        it('Sum of Royalty Split TT and royalty split for its children should less than 100%', async() =>{
+            const royalty_distribute = await royaltyModule.createRoyaltyAccount(ZERO_ADDRESS, 0, 0, '', 0, { from: accAdmin });
+            assert(royalty_dirtribute.royaltySplitForItsChildren + RoyaltyModel.ttAddress <= 10000);
+        });
+
+    });
 
     
 });

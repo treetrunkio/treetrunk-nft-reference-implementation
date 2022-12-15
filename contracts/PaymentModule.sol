@@ -30,6 +30,7 @@ contract PaymentModule is StorageStructure, Ownable {
         return true;
     }
 
+
     // NFT Listing
     // addListNFT requires seller provide their wallet address, tokenId, price of the token, and the type of the token.
     // existsInListNFT returns true there the address of the seller exist in the list 
