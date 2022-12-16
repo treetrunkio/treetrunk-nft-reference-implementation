@@ -34,6 +34,7 @@ contract RoyaltyModule is StorageStructure, Ownable {
         _minRoyaltySplit = minRoyaltySplit;
     }
 
+
     function updateRAccountLimits(uint256 maxSubAccounts, uint256 minRoyaltySplit) public virtual onlyOwner returns (bool) {
         require(_royaltySplitTT + minRoyaltySplit < 10000, 'Royalty Split to TT + Minimal Split is > 100%');
         _maxSubAccount = maxSubAccounts;
@@ -116,6 +117,12 @@ contract RoyaltyModule is StorageStructure, Ownable {
         delete _tokenindextoRA[tokenId];
     }
 
+    //Function for create a new Royalty Account which is meet the basic requirements
+    //1. Have correct royalty split configuration
+    //2. Then generate a RA for the address
+    //3. Add the RA(address) to the whole hierarchy tree.
+    //4. Confirm the subaccount of the RA meet the requirement of the hierarchy machenism.
+    //
     function createRoyaltyAccount(
         address to,
         uint256 parentTokenId,

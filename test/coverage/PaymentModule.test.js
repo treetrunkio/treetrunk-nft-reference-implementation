@@ -36,6 +36,12 @@ contract('PaymentModule', (accounts) => {
         });
     });
 
+    describe('Exist in NFT List', async =>{
+        it('The seller of current token is the input address', async =>{
+            assert,equal(ZERO_ADDRESS, accUser1);
+        });
+    });
+
     describe('addListNFT',async () =>{
         it('Check NFT Price', async () =>{
             const result = await paymentModule.addListNFT(ZERO_ADDRESS, [0], 0, '', { from: accAdmin });
@@ -51,5 +57,25 @@ contract('PaymentModule', (accounts) => {
             assert(tokenIds.length <= _maxListingNumber);
         });
     });
+
+    describe('removeListNFT', async =>{
+        it('Address of buyer should match', async() =>{
+            const result = await paymentModule.removeRegisterPayment(ZERO_ADDRESS, [0], { from: accAdmin }, '');
+            const buyer_address = registeredPayment[tokenId].buyer;
+            assert.equal(buyer_address,result.buyer);
+        })
+    });
+    describe('checkRegisteredPayment', async() =>{
+        it('buyer of the token should match', async() =>{
+            const result = await paymentModule.RegistedPayment(ZERO_ADDRESS, 0,0,'', { from: accAdmin });
+            const check_buyer = await paymentModule.checkRegistedPayment(ZERO_ADDRESS, 0,0,'', { from: accAdmin });
+            assert.equal(result[tokenId].buyer, check_buyer.buyer);
+        });
+        it('Peyment should equal the registered volume', async() => {
+            const result = await paymentModule.RegistedPayment(ZERO_ADDRESS, 0,0,'', { from: accAdmin });
+            const check = await paymentModule.checkRegistedPayment(ZERO_ADDRESS, 0,0,'', { from: accAdmin });
+            assert.equal(result[tokenId].payment, check._payment);
+        })
+    })
 
 });
