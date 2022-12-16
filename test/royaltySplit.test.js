@@ -4,13 +4,14 @@ const SomeERC20_2 = artifacts.require('SomeERC20_2');
 const DIGITS = 1000000000;
 
 contract('RoyaltyBearingToken', (accounts) => {
+    //create a mapping of Buyer & Seller account (RA & Users)
     const accAdmin = accounts[0];
     const accOwner1 = accounts[1];
     const accOwner2 = accounts[2];
     const accOwner3 = accounts[3];
     const accOwner4 = accounts[4];
     const accBuyer = accounts[5];
-    const accSeller = accounts[6];
+    const accSeller = accounts[6]; 
 
     const costOfNFT = 100 * DIGITS;
     const tokenId_1 = 1;
@@ -22,6 +23,7 @@ contract('RoyaltyBearingToken', (accounts) => {
     let someToken2;
 
     before(async () => {
+        //Suppose token to be ERC20 token and RoyaltyBearing ERC721 tokens
         someToken1 = await SomeERC20_1.deployed();
         someToken2 = await SomeERC20_2.deployed();
         token = await RoyaltyBearingToken.deployed();
@@ -30,7 +32,11 @@ contract('RoyaltyBearingToken', (accounts) => {
         //await someToken2.mint(accBuyer, cost, { from: accAdmin });
     });
 
-    describe('Royalty split scenario', async () => {
+    //Hierarchy tree of recursion porblems
+    //Recursion: 1. RA mint token and get approved
+    //           2. RA sell token to sub_accounts and get payments approved
+    // .         3. check account balance of seller and buyer 
+    describe('Royalty split scenario', async () => { 
         it('accOwner1 mint root token_1 with 20%', async () => {
             await token.mint(accOwner1, [[0x0, true, 10, 2000, 'uri_1']], 'ST2', { from: accAdmin });
             assert.equal(await token.getApproved(tokenId_1), accOwner1, 'Token approved for owner');
@@ -46,6 +52,7 @@ contract('RoyaltyBearingToken', (accounts) => {
             const a1_after = await someToken2.balanceOf(accOwner1);
             const a2_after = await someToken2.balanceOf(accOwner2);
 
+            //check balance in 2 accounts -- balance_of_seller == 0.9 * cost && balance_of_buyer == 0
             assert.equal(a1_after.toNumber(), 0.9 * costOfNFT);
             assert.equal(a2_after.toNumber(), 0);
         });

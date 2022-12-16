@@ -5,6 +5,10 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import './StorageStructure.sol';
 import 'abdk-libraries-solidity/ABDKMathQuad.sol';
 
+//PaymentModel is mainly about 2 parts
+//1. NFT Listing
+//2. Payment & Transaction Data
+
 contract PaymentModule is StorageStructure, Ownable {
     mapping(uint256 => RegisteredPayment) private registeredPayment; //A mapping with a struct for a registered payment
     mapping(uint256 => ListedNFT) private listedNFT; //A mapping for listing NFTs to be sold
@@ -25,6 +29,13 @@ contract PaymentModule is StorageStructure, Ownable {
         _maxListingNumber = maxListingNumber;
         return true;
     }
+
+
+    // NFT Listing
+    // addListNFT requires seller provide their wallet address, tokenId, price of the token, and the type of the token.
+    // existsInListNFT returns true there the address of the seller exist in the list 
+    // removeListNFT 
+
 
     function addListNFT(
         address seller,
@@ -130,6 +141,18 @@ contract PaymentModule is StorageStructure, Ownable {
             require(_isSameString(tokenType, registeredPayment[tokenId].tokenType), 'TokenType mismatch');
             return registeredPayment[tokenId].payment;
         } else return 0;
+    }
+
+    function checkRegisteredPayment(
+        address buyer,
+        uint256 tokenId,
+        uint256 _payment,
+        string memory tokenType
+    ) public view virtual returns (bool) {
+        if((registeredPayment[tokenId].buyer == buyer) && (_isSameString(tokenType, registeredPayment[tokenId].tokenType))) {
+            require(registeredPayment[tokenId].payment == _payment);
+            return true;
+        } else return false;
     }
 
     function removeRegisterPayment(address buyer, uint256 tokenId) public virtual onlyOwner {

@@ -1,0 +1,9 @@
+Basic Tests are mainly for 3 different part:
+1. Royalty Split
+    royaltySplit.test.js: Hierarchy tree structure for RAs and Individual accounts. Basic functions tests of royalty split machenism.
+    royaltySplitUpdate.test.js: Complex functions of royalty split, including trouble shooting.
+2. Stress Tests
+    Stress test according to large batch size and depth of the hierarchy tree. Check the loading of the contract.
+3. Transfer(both ERC20 & ETH)
+    Token transaction and balance change in RAs and individual accounts, using both ERC20 token(supporting NFT trading and royalty) and ETH.
+

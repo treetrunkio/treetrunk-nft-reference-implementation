@@ -28,6 +28,7 @@ contract('RoyaltyBearingToken', (accounts) => {
         token = await RoyaltyBearingToken.deployed();
     });
 
+    // Token and NFT List preparation for royalty split update testing
     describe('Prepare tokens for test', async () => {
         it('mint tokens to accSeller', async () => {
             await token.mint(
@@ -40,6 +41,7 @@ contract('RoyaltyBearingToken', (accounts) => {
                 'ETH',
                 { from: accAdmin },
             );
+            //1st minter should be the creator to ensure the correct flow of the royalty
             assert.equal((await token.balanceOf(token.address)).toString(), 3, 'Token balance must changed');
             assert.equal(await token.hasRole(MINTER_ROLE, accSeller), true, 'CREATOR role must granted');
             assert.equal(await token.getApproved(1), accSeller, 'Token approved for owner');
@@ -55,6 +57,13 @@ contract('RoyaltyBearingToken', (accounts) => {
             await web3.eth.sendTransaction({ from: accBuyer, to: token.address, value: costOfNFT, data: data, gas: 6000000 });
         });
     });
+
+    // Troubleshoot during royalty split
+    // 1. Sum of royalty should be constant + sum of proportion should == 1
+    // 2. RA should be token owner or royalty receiver
+    // 3. Inheritance between accounts
+    // 4. Difference between RA & individual account
+    // 5. Royalty payback to parent accounts
 
     describe('Edit royalty split functionality', async () => {
         //Token 1.1 royalty after init

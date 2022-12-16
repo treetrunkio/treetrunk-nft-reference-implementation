@@ -15,7 +15,7 @@ import './RoyaltyBearingTokenStorage.sol';
 import './RoyaltyModule.sol';
 import './PaymentModule.sol';
 
-contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721URIStorage, AccessControlEnumerable, RoyaltyBearingTokenStorage, IERC721Receiver, ReentrancyGuard {
+contract RoyaltyBearingToken is ERC721Burnable, ERC721Pausable, ERC721URIStorage, AccessControlEnumerable, RoyaltyBearingTokenStorage, IERC721Receiver, ReentrancyGuard {
     using Address for address;
     using Counters for Counters.Counter;
     bool private onlyOnce = false;
@@ -280,9 +280,10 @@ contract RoyaltyBearingToken is ERC721, ERC721Burnable, ERC721Pausable, ERC721UR
     function _beforeTokenTransfer(
         address from,
         address to,
-        uint256 tokenId
-    ) internal virtual override(ERC721, ERC721Pausable) {
-        super._beforeTokenTransfer(from, to, tokenId);
+        uint256 tokenId,
+        uint256 batchSize
+    ) internal virtual override (ERC721,ERC721Pausable){
+        super._beforeTokenTransfer(from, to, tokenId, batchSize);
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControlEnumerable, ERC721) returns (bool) {
