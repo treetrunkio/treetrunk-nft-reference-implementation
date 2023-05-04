@@ -15,13 +15,13 @@ contract('PaymentModule', (accounts) => {
 
     describe('Only owner can call update functions', async () => {
         it('addListNFT', async () => {
-            await truffleAssert.reverts(paymentModule.addListNFT(ZERO_ADDRESS, [0], 0, '', { from: accAdmin }), '');
+            await truffleAssert.reverts(paymentModule.addListNFT(ZERO_ADDRESS, [0], 0, '', { from: accAdmin }), 'Ownable: caller is not the owner');
         });
         it('addRegisterPayment', async () => {
-            await truffleAssert.reverts(paymentModule.addRegisterPayment(ZERO_ADDRESS, [0], 0, '', { from: accAdmin }), '');
+            await truffleAssert.reverts(paymentModule.addRegisterPayment(ZERO_ADDRESS, [0], 0, '', { from: accAdmin }), 'Ownable: caller is not the owner');
         });
         it('removeRegisterPayment', async () => {
-            await truffleAssert.reverts(paymentModule.removeRegisterPayment(ZERO_ADDRESS, [0], { from: accAdmin }), '');
+            await truffleAssert.reverts(paymentModule.removeRegisterPayment(ZERO_ADDRESS, [0], { from: accAdmin }), 'Ownable: caller is not the owner');
         });
     });
 

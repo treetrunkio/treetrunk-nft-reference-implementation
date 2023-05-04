@@ -15,22 +15,22 @@ contract('RoyaltyModule', (accounts) => {
 
     describe('Only owner can call update functions', async () => {
         it('createRoyaltyAccount', async () => {
-            await truffleAssert.reverts(royaltyModule.createRoyaltyAccount(ZERO_ADDRESS, 0, 0, '', 0, { from: accAdmin }), '');
+            await truffleAssert.reverts(royaltyModule.createRoyaltyAccount(ZERO_ADDRESS, 0, 0, '', 0, { from: accAdmin }), 'Ownable: caller is not the owner');
         });
         it('updateRoyaltyAccount', async () => {
-            await truffleAssert.reverts(royaltyModule.updateRoyaltyAccount(0, [], ZERO_ADDRESS, true, { from: accAdmin }), '');
+            await truffleAssert.reverts(royaltyModule.updateRoyaltyAccount(0, [], ZERO_ADDRESS, true, { from: accAdmin }), 'Ownable: caller is not the owner');
         });
         it('deleteRoyaltyAccount', async () => {
-            await truffleAssert.reverts(royaltyModule.deleteRoyaltyAccount(0, { from: accAdmin }), '');
+            await truffleAssert.reverts(royaltyModule.deleteRoyaltyAccount(0, { from: accAdmin }), 'Ownable: caller is not the owner');
         });
         it('distributePayment', async () => {
-            await truffleAssert.reverts(royaltyModule.distributePayment(0, 0, { from: accAdmin }), '');
+            await truffleAssert.reverts(royaltyModule.distributePayment(0, 0, { from: accAdmin }), 'Ownable: caller is not the owner');
         });
         it('withdrawBalance', async () => {
-            await truffleAssert.reverts(royaltyModule.withdrawBalance(0, ZERO_ADDRESS, 0, { from: accAdmin }), '');
+            await truffleAssert.reverts(royaltyModule.withdrawBalance(0, ZERO_ADDRESS, 0, { from: accAdmin }), 'Ownable: caller is not the owner');
         });
         it('transferRAOwnership', async () => {
-            await truffleAssert.reverts(royaltyModule.transferRAOwnership(ZERO_ADDRESS, 0, ZERO_ADDRESS, { from: accAdmin }), '');
+            await truffleAssert.reverts(royaltyModule.transferRAOwnership(ZERO_ADDRESS, 0, ZERO_ADDRESS, { from: accAdmin }), 'Ownable: caller is not the owner');
         });
     });
     describe('Getter functions', async () => {
