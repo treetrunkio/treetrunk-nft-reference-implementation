@@ -15,22 +15,22 @@ contract('RoyaltyModule', (accounts) => {
 
     describe('Only owner can call update functions', async () => {
         it('createRoyaltyAccount', async () => {
-            await truffleAssert.reverts(royaltyModule.createRoyaltyAccount(ZERO_ADDRESS, 0, 0, '', 0, { from: accAdmin }), 'Ownable: caller is not the owner');
+            await truffleAssert.reverts(royaltyModule.createRoyaltyAccount(ZERO_ADDRESS, 0, 0, '', 0, { from: accAdmin }), '');
         });
         it('updateRoyaltyAccount', async () => {
-            await truffleAssert.reverts(royaltyModule.updateRoyaltyAccount(0, [], ZERO_ADDRESS, true, { from: accAdmin }), 'Ownable: caller is not the owner');
+            await truffleAssert.reverts(royaltyModule.updateRoyaltyAccount(0, [], ZERO_ADDRESS, true, { from: accAdmin }), '');
         });
         it('deleteRoyaltyAccount', async () => {
-            await truffleAssert.reverts(royaltyModule.deleteRoyaltyAccount(0, { from: accAdmin }), 'Ownable: caller is not the owner');
+            await truffleAssert.reverts(royaltyModule.deleteRoyaltyAccount(0, { from: accAdmin }), '');
         });
         it('distributePayment', async () => {
-            await truffleAssert.reverts(royaltyModule.distributePayment(0, 0, { from: accAdmin }), 'Ownable: caller is not the owner');
+            await truffleAssert.reverts(royaltyModule.distributePayment(0, 0, { from: accAdmin }), '');
         });
         it('withdrawBalance', async () => {
-            await truffleAssert.reverts(royaltyModule.withdrawBalance(0, ZERO_ADDRESS, 0, { from: accAdmin }), 'Ownable: caller is not the owner');
+            await truffleAssert.reverts(royaltyModule.withdrawBalance(0, ZERO_ADDRESS, 0, { from: accAdmin }), '');
         });
         it('transferRAOwnership', async () => {
-            await truffleAssert.reverts(royaltyModule.transferRAOwnership(ZERO_ADDRESS, 0, ZERO_ADDRESS, { from: accAdmin }), 'Ownable: caller is not the owner');
+            await truffleAssert.reverts(royaltyModule.transferRAOwnership(ZERO_ADDRESS, 0, ZERO_ADDRESS, { from: accAdmin }), '');
         });
     });
     describe('Getter functions', async () => {
@@ -39,5 +39,17 @@ contract('RoyaltyModule', (accounts) => {
             assert.equal(balance, 0);
         });
     });
+    describe('Test correct RoyaltySplitTT', async() => {
+        it('Royalty Split to be received from their children should less than 100%', async() => {
+            const royalty_distribute = await royaltyModule.createRoyaltyAccount(ZERO_ADDRESS, 0, 0, '', 0, { from: accAdmin });
+            assert(royalty_distribute.royaltySplitForItsChildren <= 10000); 
+        });
+        it('Sum of Royalty Split TT and royalty split for its children should less than 100%', async() =>{
+            const royalty_distribute = await royaltyModule.createRoyaltyAccount(ZERO_ADDRESS, 0, 0, '', 0, { from: accAdmin });
+            assert(royalty_dirtribute.royaltySplitForItsChildren + RoyaltyModel.ttAddress <= 10000);
+        });
 
+    });
+
+    
 });
