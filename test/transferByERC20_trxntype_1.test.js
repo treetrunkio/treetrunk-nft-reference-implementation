@@ -80,9 +80,10 @@ contract('RoyaltyBearingToken', (accounts) => {
             assert.equal(royaltyBefore.t1.subaccounts[0].accountId, accSeller);
             assert.equal(royaltyBefore.t2.subaccounts[0].accountId, accSeller);
 
+            const chainId = await web3.eth.getChainId();
             const data = web3.eth.abi.encodeParameters(
                 ['address', 'address', 'address', 'uint256[]', 'string', 'uint256', 'address', 'uint256'],
-                [accSeller, accBuyer, accBuyer, [tokenId_1, tokenId_2], 'ST2', costOfNFT, someToken2.address, 1],
+                [accSeller, accBuyer, accBuyer, [tokenId_1, tokenId_2], 'ST2', costOfNFT, someToken2.address, chainId],
             );
             //truffle fail to select valid method safeTransferFrom
             //await token.safeTransferFrom(accSeller, accOwner3, tokenId, data,{from:accSeller});

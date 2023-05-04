@@ -252,39 +252,44 @@ contract('RoyaltyBearingToken', (accounts) => {
     });
     describe('safeTransferFrom restrictions', async () => {
         it('Wrong metadata: seller address', async () => {
+            const chainId = await web3.eth.getChainId();
             const data = web3.eth.abi.encodeParameters(
                 ['address', 'address', 'address', 'uint256[]', 'string', 'uint256', 'address', 'uint256'],
-                [accSomeOther, accBuyer, accBuyer, [1], 'ST2', costOfNFT, someToken2.address, 1],
+                [accSomeOther, accBuyer, accBuyer, [1], 'ST2', costOfNFT, someToken2.address, chainId],
             );
             await truffleAssert.reverts(token.methods['safeTransferFrom(address,address,uint256,bytes)'](accSeller, accBuyer, 1, data, { from: accSeller }), 'Seller not From address');
         });
         it('Wrong metadata: receiver address', async () => {
+            const chainId = await web3.eth.getChainId();
             const data = web3.eth.abi.encodeParameters(
                 ['address', 'address', 'address', 'uint256[]', 'string', 'uint256', 'address', 'uint256'],
-                [accSeller, accBuyer, accSomeOther, [1], 'ST2', costOfNFT, someToken2.address, 1],
+                [accSeller, accBuyer, accSomeOther, [1], 'ST2', costOfNFT, someToken2.address, chainId],
             );
             await truffleAssert.reverts(token.methods['safeTransferFrom(address,address,uint256,bytes)'](accSeller, accBuyer, 1, data, { from: accSeller }), 'Receiver not To address');
         });
 
         it('Wrong metadata: wrong payment', async () => {
+            const chainId = await web3.eth.getChainId();
             const data = web3.eth.abi.encodeParameters(
                 ['address', 'address', 'address', 'uint256[]', 'string', 'uint256', 'address', 'uint256'],
-                [accSeller, accBuyer, accBuyer, [1], 'ST2', costOfNFT + 1, someToken2.address, 1],
+                [accSeller, accBuyer, accBuyer, [1], 'ST2', costOfNFT + 1, someToken2.address, chainId],
             );
             await truffleAssert.reverts(token.methods['safeTransferFrom(address,address,uint256,bytes)'](accSeller, accBuyer, 1, data, { from: accSeller }), 'Payment not match');
         });
 
         it('Wrong metadata: token ids', async () => {
+            const chainId = await web3.eth.getChainId();
             const data = web3.eth.abi.encodeParameters(
                 ['address', 'address', 'address', 'uint256[]', 'string', 'uint256', 'address', 'uint256'],
-                [accSeller, accBuyer, accBuyer, [2], 'ST2', costOfNFT, someToken2.address, 1],
+                [accSeller, accBuyer, accBuyer, [2], 'ST2', costOfNFT, someToken2.address, chainId],
             );
             await truffleAssert.reverts(token.methods['safeTransferFrom(address,address,uint256,bytes)'](accSeller, accBuyer, 1, data, { from: accSeller }), 'Wrong NFT listing');
         });
         it('Wrong metadata: pay token symbol', async () => {
+            const chainId = await web3.eth.getChainId();
             const data = web3.eth.abi.encodeParameters(
                 ['address', 'address', 'address', 'uint256[]', 'string', 'uint256', 'address', 'uint256'],
-                [accSeller, accBuyer, accBuyer, [1], 'ST1', costOfNFT, someToken2.address, 1],
+                [accSeller, accBuyer, accBuyer, [1], 'ST1', costOfNFT, someToken2.address, chainId],
             );
             await truffleAssert.reverts(token.methods['safeTransferFrom(address,address,uint256,bytes)'](accSeller, accBuyer, 1, data, { from: accSeller }), 'TokenType not match');
         });
@@ -296,17 +301,19 @@ contract('RoyaltyBearingToken', (accounts) => {
             await truffleAssert.reverts(token.methods['safeTransferFrom(address,address,uint256,bytes)'](accSeller, accBuyer, 1, data, { from: accSeller }), 'Transfer on wrong Blockchain');
         });
         it('Token list must be owned by seller', async () => {
+            const chainId = await web3.eth.getChainId();
             const data = web3.eth.abi.encodeParameters(
                 ['address', 'address', 'address', 'uint256[]', 'string', 'uint256', 'address', 'uint256'],
-                [accSeller, accBuyer, accBuyer, [1, 2], 'ST2', costOfNFT, someToken2.address, 1],
+                [accSeller, accBuyer, accBuyer, [1, 2], 'ST2', costOfNFT, someToken2.address, chainId],
             );
             await truffleAssert.reverts(token.methods['safeTransferFrom(address,address,uint256,bytes)'](accSeller, accBuyer, 1, data, { from: accSeller }), 'Seller is not owner');
         });
 
         it('Transfer (1) success', async () => {
+            const chainId = await web3.eth.getChainId();
             const data = web3.eth.abi.encodeParameters(
                 ['address', 'address', 'address', 'uint256[]', 'string', 'uint256', 'address', 'uint256'],
-                [accSeller, accBuyer, accBuyer, [1], 'ST2', costOfNFT, someToken2.address, 1],
+                [accSeller, accBuyer, accBuyer, [1], 'ST2', costOfNFT, someToken2.address, chainId],
             );
             //truffle fail to select valid method safeTransferFrom
             //await token.safeTransferFrom(accSeller, accOwner3, tokenId, data,{from:accSeller});
@@ -316,9 +323,10 @@ contract('RoyaltyBearingToken', (accounts) => {
         });
 
         it('Repeat transfer not allowed', async () => {
+            const chainId = await web3.eth.getChainId();
             const data = web3.eth.abi.encodeParameters(
                 ['address', 'address', 'address', 'uint256[]', 'string', 'uint256', 'address', 'uint256'],
-                [accSeller, accBuyer, accBuyer, [1], 'ST2', costOfNFT, someToken2.address, 1],
+                [accSeller, accBuyer, accBuyer, [1], 'ST2', costOfNFT, someToken2.address, chainId],
             );
             await truffleAssert.reverts(token.methods['safeTransferFrom(address,address,uint256,bytes)'](accSeller, accBuyer, 1, data, { from: accSeller }), 'RegisterPayment not found');
         });
@@ -461,6 +469,7 @@ contract('RoyaltyBearingToken', (accounts) => {
         });
 
         it('Only registered function can be called', async () => {
+            const chainId = await web3.eth.getChainId();
             await truffleAssert.reverts(
                 token.delegateAuthority(
                     funcSig2,
@@ -469,13 +478,14 @@ contract('RoyaltyBearingToken', (accounts) => {
                     [0,1,2],
                     [web3.utils.randomHex(32)],
                     [web3.utils.randomHex(32)],
-                    1,
+                    chainId,
                     { from: accAdmin },
                 ),
                 'Not a valid function',
             );
         });
         it('Invalid signature not allowed', async () => {
+            const chainId = await web3.eth.getChainId();
             await truffleAssert.reverts(
                 token.delegateAuthority(
                     funcSig1,
@@ -484,7 +494,7 @@ contract('RoyaltyBearingToken', (accounts) => {
                     [0,1,2],
                     [web3.utils.randomHex(32)],
                     [web3.utils.randomHex(32)],
-                    1,
+                    chainId,
                     { from: accAdmin },
                 ),
                 'Signature',
