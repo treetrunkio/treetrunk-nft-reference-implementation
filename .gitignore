@@ -4,3 +4,7 @@ node_modules
 .coverage*
 package-lock.json
 .vscode
+package.json
+coverage.json
+truffle-config.js
+coverage/
