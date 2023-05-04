@@ -291,7 +291,7 @@ contract('RoyaltyBearingToken', (accounts) => {
                 ['address', 'address', 'address', 'uint256[]', 'string', 'uint256', 'address', 'uint256'],
                 [accSeller, accBuyer, accBuyer, [1], 'ST1', costOfNFT, someToken2.address, chainId],
             );
-            await truffleAssert.reverts(token.methods['safeTransferFrom(address,address,uint256,bytes)'](accSeller, accBuyer, 1, data, { from: accSeller }), 'TokenType not match');
+            await truffleAssert.reverts(token.methods['safeTransferFrom(address,address,uint256,bytes)'](accSeller, accBuyer, 1, data, { from: accSeller }), 'TokenType mismatch');
         });
         it('Wrong metadata: wrong chain id', async () => {
             const data = web3.eth.abi.encodeParameters(
@@ -328,7 +328,7 @@ contract('RoyaltyBearingToken', (accounts) => {
                 ['address', 'address', 'address', 'uint256[]', 'string', 'uint256', 'address', 'uint256'],
                 [accSeller, accBuyer, accBuyer, [1], 'ST2', costOfNFT, someToken2.address, chainId],
             );
-            await truffleAssert.reverts(token.methods['safeTransferFrom(address,address,uint256,bytes)'](accSeller, accBuyer, 1, data, { from: accSeller }), 'RegisterPayment not found');
+            await truffleAssert.reverts(token.methods['safeTransferFrom(address,address,uint256,bytes)'](accSeller, accBuyer, 1, data, { from: accSeller }), 'Payment not match');
         });
     });
     describe('royaltyPayOut restrictions', async () => {

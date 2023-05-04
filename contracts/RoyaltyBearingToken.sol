@@ -467,7 +467,7 @@ contract RoyaltyBearingToken is ERC721Burnable, ERC721Pausable, ERC721URIStorage
         require(_chainId == block.chainid, 'Transfer on wrong Blockchain');
 
         //check register payment
-        require(paymentModule.checkRegisterPayment(_tokenIds[0], _buyer, _tokenType) != 0);
+        require(_payment == paymentModule.checkRegisterPayment(_tokenIds[0], _buyer, _tokenType), 'Payment not match');
 
         _requireExistsAndOwned(_tokenIds, _seller);
 
