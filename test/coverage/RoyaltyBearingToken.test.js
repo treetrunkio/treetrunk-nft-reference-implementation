@@ -468,9 +468,6 @@ contract('RoyaltyBearingToken', (accounts) => {
         it('getRoyaltyAccount cant get not exist token', async () => {
             await truffleAssert.reverts(token.getRoyaltyAccount(token_not_exists, { from: accSomeOther }), 'NFT does not exist');
         });
-        it('getRoyaltyAccount cant get not exist token', async () => {
-            await truffleAssert.reverts(token.getRoyaltyAccount(token_not_exists, { from: accSomeOther }), 'NFT does not exist');
-        });
     });
     describe('Delegate call', async () => {
         const funcSig1 = web3.utils.keccak256('updateMaxGenerations(uint256)').substring(0, 6);
