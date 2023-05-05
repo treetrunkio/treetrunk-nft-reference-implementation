@@ -119,6 +119,9 @@ contract('RoyaltyBearingToken', (accounts) => {
             await truffleAssert.reverts(token.listNFT([2, 3], costOfNFT, 'ST2', { from: accSeller }), 'Too many NFTs listed');
             await token.updatelistinglimit(10, { from: accAdmin });
         });
+        it('Zero Price is not allowed', async () => {
+            await truffleAssert.reverts(token.listNFT([1], 0, 'ST2', { from: accSeller }), 'Zero Price not allowed');
+        });
         it('List NFT (2,3)', async () => {
             await token.listNFT([2, 3], costOfNFT, 'ST2', { from: accSeller });
         });
@@ -159,6 +162,9 @@ contract('RoyaltyBearingToken', (accounts) => {
             assert.equal(result[1].toNumber(), 5);
             assert.equal(result[2].toNumber(), 1);
         });
+        it('getListNFT but listing not exist', async () => {
+            await truffleAssert.reverts(paymentModule.getListNFT(token_not_exists), 'Listing not exist');
+        });
     });
 
     describe('executePayment restriction', (async) => {
@@ -191,6 +197,9 @@ contract('RoyaltyBearingToken', (accounts) => {
         });
         it('Payment ignore other trxntype', async () => {
             await truffleAssert.reverts(token.executePayment(accReceiver, accSeller, [2, 3], costOfNFT, 'ST2', 4, { from: accBuyer }), 'Trxn type not supported');
+        });
+        it('NFT(s) not listed', async () => {
+            await truffleAssert.reverts(token.executePayment(accReceiver, accSeller, [4], costOfNFT, 'ST2', 0, { from: accBuyer }), 'NFT(s) not listed');
         });
 
         it('Payment for (2,3) trxntype=0 success', async () => {
@@ -447,11 +456,17 @@ contract('RoyaltyBearingToken', (accounts) => {
         it('updatelistinglimit caller must be creator', async () => {
             await truffleAssert.reverts(token.updatelistinglimit(10, { from: accSomeOther }), 'Creator role required');
         });
+        it('maxListingNumber > 0', async () => {
+            await truffleAssert.reverts(token.updatelistinglimit(0, { from: accAdmin }), 'Max number must be > 0');
+        });
         it('updateRAccountLimits caller must be creator', async () => {
             await truffleAssert.reverts(token.updateRAccountLimits(10, 10, { from: accSomeOther }), 'Creator role required');
         });
         it('onERC721Received accept only own tokens', async () => {
             await truffleAssert.reverts(token.onERC721Received(ZERO_ADDRESS, accSomeOther, 1, '0x0', { from: accSomeOther }), 'Only minted');
+        });
+        it('getRoyaltyAccount cant get not exist token', async () => {
+            await truffleAssert.reverts(token.getRoyaltyAccount(token_not_exists, { from: accSomeOther }), 'NFT does not exist');
         });
         it('getRoyaltyAccount cant get not exist token', async () => {
             await truffleAssert.reverts(token.getRoyaltyAccount(token_not_exists, { from: accSomeOther }), 'NFT does not exist');
@@ -498,6 +513,21 @@ contract('RoyaltyBearingToken', (accounts) => {
                     { from: accAdmin },
                 ),
                 'Signature',
+            );
+        });
+        it('Wrong blockchain not allowed', async () => {
+            await truffleAssert.reverts(
+                token.delegateAuthority(
+                    funcSig1,
+                    web3.utils.randomHex(32), //
+                    web3.utils.randomHex(32),
+                    [0,1,2],
+                    [web3.utils.randomHex(32)],
+                    [web3.utils.randomHex(32)],
+                    999,
+                    { from: accAdmin },
+                ),
+                'Wrong blockchain',
             );
         });
     });
