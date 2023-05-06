@@ -260,6 +260,7 @@ contract RoyaltyBearingToken is ERC721Burnable, ERC721Pausable, ERC721URIStorage
 
     //Functions for support ERC721 extensions
     function tokenURI(uint256 tokenId) public view virtual override(ERC721, ERC721URIStorage) returns (string memory) {
+        require(_exists(tokenId), 'URI query for nonexistent token');
         return super.tokenURI(tokenId);
     }
 
@@ -295,6 +296,7 @@ contract RoyaltyBearingToken is ERC721Burnable, ERC721Pausable, ERC721URIStorage
     }
 
     function burn(uint256 tokenId) public virtual override {
+        require(_exists(tokenId), 'ERC721: approved query for nonexistent token');
         require(getApproved(tokenId) == _msgSender(), 'Sender not authorized to burn');
         require(ancestry[tokenId].children.length == 0, 'NFT must not have children');
         //delete token from royalty (check for 0 balance included)
@@ -346,6 +348,7 @@ contract RoyaltyBearingToken is ERC721Burnable, ERC721Pausable, ERC721URIStorage
     ) public virtual returns (bool) {
 
         for (uint256 i = 0; i < tokenIds.length; i++) {
+            require(_exists(tokenIds[i]), 'ERC721: approved query for nonexistent token');
             require(getApproved(tokenIds[i]) == _msgSender(), 'Must be token owner');
             require(royaltyModule.isSupportedTokenType(tokenIds[i], tokenType), 'Unsupported token type');
         }
@@ -464,7 +467,7 @@ contract RoyaltyBearingToken is ERC721Burnable, ERC721Pausable, ERC721URIStorage
         require(_chainId == block.chainid, 'Transfer on wrong Blockchain');
 
         //check register payment
-        require(paymentModule.checkRegisterPayment(_buyer, _tokenIds, _payment, _tokenType));
+        require(_payment == paymentModule.checkRegisterPayment(_tokenIds[0], _buyer, _tokenType), 'Payment not match');
 
         _requireExistsAndOwned(_tokenIds, _seller);
 
